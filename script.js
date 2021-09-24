@@ -1,5 +1,9 @@
 let result = document.querySelector('.result');
-let startButton = document.querySelector('.start');
+let playerButtons = document.querySelectorAll('.player');
+let currentRound = document.querySelector('.current-round');
+let winner = document.querySelector('.winner');
+let restartButton = document.querySelector('.restart');
+restartButton.disabled = true;
 let win = 0;
 let draw = 0;
 let lose = 0;
@@ -12,8 +16,9 @@ function computerPlay() {
 }
 
 function playRound(playerSelection, computerSelection){
-    console.log(`Player plays ${ playerSelection }`);
-    console.log(`Computer plays ${ computerSelection }`);
+    currentRound.textContent = '';
+    currentRound.textContent += `Player plays ${ playerSelection }, `;
+    currentRound.textContent += `Computer plays ${ computerSelection }.`;
     if (playerSelection == computerSelection) {
         draw++;
         return;
@@ -36,21 +41,46 @@ function updateResult() {
 }
 
 function game() {
-    let playerSelection;
-    let computerSelection;
     win = 0; draw = 0; lose = 0;
-    for (let i=0; i<5; i++) {
-        while (1) {
-            playerSelection = prompt('What do you play?').toLowerCase();
-            if (ValidPlays.indexOf(playerSelection) === -1) {
-                prompt('Invalid selection! You can only choose rock, paper, scissors');
-            } else {
-                break;
-            }
-        }
-        computerSelection = computerPlay();
-        playRound(playerSelection, computerSelection);
-        updateResult();
-    }
 }
-startButton.addEventListener('click', game);
+
+function checkWinner() {
+    if (win < 5 && lose < 5) {return;}
+    if (win === 5) {
+        winner.textContent = 'Player wins!';
+        playerButtons.forEach( function (button) {
+            button.disabled = true;
+        });
+    }
+    if (lose === 5) {
+        winner.textContent = 'Computer wins!';
+        playerButtons.forEach( function (button) {
+            button.disabled = true;
+        });
+    }
+    restartButton.disabled = false;
+}
+
+function handleClick (e) {
+    let playerSelection = e.target.id;
+    let computerSelection = computerPlay();
+    playRound(playerSelection, computerSelection);
+    updateResult();
+    checkWinner();
+}
+
+function restart() {
+    win = 0;
+    draw = 0;
+    lose = 0;
+    currentRound.textContent = '';
+    winner.textContent = '';
+    result.textContent = '';
+    playerButtons.forEach((button) => {
+        button.disabled = false
+    });
+    restartButton.disabled = true;
+}
+
+playerButtons.forEach(key => key.addEventListener('click', handleClick));
+restartButton.addEventListener('click', restart);
